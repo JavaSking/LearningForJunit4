@@ -63,9 +63,9 @@ public abstract class Request {
 	/**
 	 * 创建测试目标测试类的请求。
 	 * 
-	 * @param computer 
-	 * @param classes
-	 * @return
+	 * @param computer 计算机系统。
+	 * @param classes 待测试类。
+	 * @return 测试请求。
 	 */
 	public static Request classes(Computer computer, Class<?>... classes) {
 		try {

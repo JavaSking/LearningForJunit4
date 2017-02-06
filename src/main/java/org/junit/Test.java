@@ -23,13 +23,11 @@ import java.lang.annotation.Target;
  *    }
  * </pre>
  * 
- * <b>线程安全提醒:</b> Test methods with a timeout parameter are run in a thread
- * other than the thread which runs the fixture's @Before and @After methods.
- * This may yield different behavior for code that is not thread safe when
- * compared to the same test method without a timeout parameter. <b>Consider
- * using the {@link org.junit.rules.Timeout} rule instead</b>, which ensures a
- * test method is run on the same thread as the fixture's @Before and @After
- * methods.
+ * <b>线程安全提醒:</b> 
+ * <pre>
+ * 1、使用属性timeout的Test方法是单线程的,详见｛@link FailOnTimeout｝evaluateStatement()方法。
+ * 2、使用{@link org.junit.rules.Timeout}规则将保证运行@Before和@After方法在同一个线程中。
+ * </pre>
  * 
  * @since 4.0
  * @author 注释By JavaSking 2017年2月4日

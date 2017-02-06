@@ -1,150 +1,225 @@
 package org.junit;
 
 /**
- * Thrown when an {@link org.junit.Assert#assertEquals(Object, Object) assertEquals(String, String)} fails. Create and throw
- * a <code>ComparisonFailure</code> manually if you want to show users the difference between two complex
- * strings.
- *
- * Inspired by a patch from Alex Chaffee (alex@purpletech.com)
- *
- * @since 4.0
+ * 字符串比较断言错误。当{@link org.junit.Assert#assertEquals(Object, Object)
+ * assertEquals(String, String)} 失败时抛出。
+ * 
+ * @author 注释By JavaSking
+ * @since 4.0 2017年2月6日
  */
 public class ComparisonFailure extends AssertionError {
-    /**
-     * The maximum length for fExpected and fActual. If it is exceeded, the strings should be shortened.
-     *
-     * @see ComparisonCompactor
-     */
-    private static final int MAX_CONTEXT_LENGTH = 20;
-    private static final long serialVersionUID = 1L;
+	
+	/**
+	 * 期望字符串/实际字符串的最大长度，超出将截断。
+	 * @see ComparisonCompactor
+	 */
+	private static final int MAX_CONTEXT_LENGTH = 20;
 
-    private String fExpected;
-    private String fActual;
+	/**
+	 * 序列号。
+	 */
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructs a comparison failure.
-     *
-     * @param message the identifying message or null
-     * @param expected the expected string value
-     * @param actual the actual string value
-     */
-    public ComparisonFailure(String message, String expected, String actual) {
-        super(message);
-        fExpected = expected;
-        fActual = actual;
-    }
+	/**
+	 * 期望字符串。
+	 */
+	private String fExpected;
 
-    /**
-     * Returns "..." in place of common prefix and "..." in
-     * place of common suffix between expected and actual.
-     *
-     * @see Throwable#getMessage()
-     */
-    @Override
-    public String getMessage() {
-        return new ComparisonCompactor(MAX_CONTEXT_LENGTH, fExpected, fActual).compact(super.getMessage());
-    }
+	/**
+	 * 实际字符串。
+	 */
+	private String fActual;
 
-    /**
-     * Returns the actual string value
-     *
-     * @return the actual string value
-     */
-    public String getActual() {
-        return fActual;
-    }
+	/**
+	 * 构造一个字符串比较断言错误。
+	 * 
+	 * @param message 错误信息，可能为null。
+	 * @param expected 期望字符串。
+	 * @param actual 实际字符串。
+	 */
+	public ComparisonFailure(String message, String expected, String actual) {
+		
+		super(message);
+		fExpected = expected;
+		fActual = actual;
+	}
 
-    /**
-     * Returns the expected string value
-     *
-     * @return the expected string value
-     */
-    public String getExpected() {
-        return fExpected;
-    }
+	/**
+	 * Returns "..." in place of common prefix and "..." in place of common suffix
+	 * between expected and actual.
+	 *
+	 * @see Throwable#getMessage()
+	 */
+	
+	@Override
+	public String getMessage() {
 
-    private static class ComparisonCompactor {
-        private static final String ELLIPSIS = "...";
-        private static final String DELTA_END = "]";
-        private static final String DELTA_START = "[";
+		return new ComparisonCompactor(MAX_CONTEXT_LENGTH, fExpected, fActual).compact(super.getMessage());
+	}
 
-        /**
-         * The maximum length for <code>expected</code> and <code>actual</code>. When <code>contextLength</code>
-         * is exceeded, the Strings are shortened
-         */
-        private int fContextLength;
-        private String fExpected;
-        private String fActual;
-        private int fPrefix;
-        private int fSuffix;
+	/**
+	 * 获取实际字符串。
+	 * 
+	 * @return 实际字符串。
+	 */
+	public String getActual() {
 
-        /**
-         * @param contextLength the maximum length for <code>expected</code> and <code>actual</code>. When contextLength
-         * is exceeded, the Strings are shortened
-         * @param expected the expected string value
-         * @param actual the actual string value
-         */
-        public ComparisonCompactor(int contextLength, String expected, String actual) {
-            fContextLength = contextLength;
-            fExpected = expected;
-            fActual = actual;
-        }
+		return fActual;
+	}
 
-        private String compact(String message) {
-            if (fExpected == null || fActual == null || areStringsEqual()) {
-                return Assert.format(message, fExpected, fActual);
-            }
+	/**
+	 * 获取期望字符串。
+	 * 
+	 * @return 期望字符串。
+	 */
+	public String getExpected() {
 
-            findCommonPrefix();
-            findCommonSuffix();
-            String expected = compactString(fExpected);
-            String actual = compactString(fActual);
-            return Assert.format(message, expected, actual);
-        }
+		return fExpected;
+	}
 
-        private String compactString(String source) {
-            String result = DELTA_START + source.substring(fPrefix, source.length() - fSuffix + 1) + DELTA_END;
-            if (fPrefix > 0) {
-                result = computeCommonPrefix() + result;
-            }
-            if (fSuffix > 0) {
-                result = result + computeCommonSuffix();
-            }
-            return result;
-        }
+	/**
+	 * 
+	 * @author JavaSking
+	 * 2017年2月6日
+	 */
+	private static class ComparisonCompactor {
 
-        private void findCommonPrefix() {
-            fPrefix = 0;
-            int end = Math.min(fExpected.length(), fActual.length());
-            for (; fPrefix < end; fPrefix++) {
-                if (fExpected.charAt(fPrefix) != fActual.charAt(fPrefix)) {
-                    break;
-                }
-            }
-        }
+		/**
+		 * 代替相同前后缀。
+		 */
+		private static final String ELLIPSIS = "...";
 
-        private void findCommonSuffix() {
-            int expectedSuffix = fExpected.length() - 1;
-            int actualSuffix = fActual.length() - 1;
-            for (; actualSuffix >= fPrefix && expectedSuffix >= fPrefix; actualSuffix--, expectedSuffix--) {
-                if (fExpected.charAt(expectedSuffix) != fActual.charAt(actualSuffix)) {
-                    break;
-                }
-            }
-            fSuffix = fExpected.length() - expectedSuffix;
-        }
+		private static final String DELTA_END = "]";
 
-        private String computeCommonPrefix() {
-            return (fPrefix > fContextLength ? ELLIPSIS : "") + fExpected.substring(Math.max(0, fPrefix - fContextLength), fPrefix);
-        }
+		private static final String DELTA_START = "[";
 
-        private String computeCommonSuffix() {
-            int end = Math.min(fExpected.length() - fSuffix + 1 + fContextLength, fExpected.length());
-            return fExpected.substring(fExpected.length() - fSuffix + 1, end) + (fExpected.length() - fSuffix + 1 < fExpected.length() - fContextLength ? ELLIPSIS : "");
-        }
+		/**
+		 * 最大长度，超出则截断。
+		 */
+		private int fContextLength;
 
-        private boolean areStringsEqual() {
-            return fExpected.equals(fActual);
-        }
-    }
+		/**
+		 * 期望字符串。
+		 */
+		private String fExpected;
+
+		/**
+		 * 实际字符串。
+		 */
+		private String fActual;
+
+		/**
+		 * 期望字符串和实际字符串的相同前缀长度。
+		 */
+		private int fPrefix;
+
+		/**
+		 * 期望字符串和实际字符串的相同后缀长度。
+		 */
+		private int fSuffix;
+
+		/**
+		 * 构造方法。
+		 * 
+		 * @param contextLength 最大长度，超出则截断。
+		 * @param expected 期望字符串。
+		 * @param actual 实际字符串。
+		 */
+		public ComparisonCompactor(int contextLength, String expected, String actual) {
+			
+			fContextLength = contextLength;
+			fExpected = expected;
+			fActual = actual;
+		}
+
+		/**
+		 * 
+		 * @param message
+		 * @return
+		 */
+		private String compact(String message) {
+
+			if (fExpected == null || fActual == null || areStringsEqual()) {
+				return Assert.format(message, fExpected, fActual);
+			}
+
+			findCommonPrefix();
+			findCommonSuffix();
+			String expected = compactString(fExpected);
+			String actual = compactString(fActual);
+			return Assert.format(message, expected, actual);
+		}
+
+		private String compactString(String source) {
+
+			String result = DELTA_START + source.substring(fPrefix, source.length() - fSuffix + 1) + DELTA_END;
+			if (fPrefix > 0) {
+				result = computeCommonPrefix() + result;
+			}
+			if (fSuffix > 0) {
+				result = result + computeCommonSuffix();
+			}
+			return result;
+		}
+
+		/**
+		 * 寻找期望字符串和实际字符串的相同前缀。
+		 */
+		private void findCommonPrefix() {
+
+			fPrefix = 0;
+			int end = Math.min(fExpected.length(), fActual.length());
+			for (; fPrefix < end; fPrefix++) {
+				if (fExpected.charAt(fPrefix) != fActual.charAt(fPrefix)) {
+					break;
+				}
+			}
+		}
+
+		/**
+		 * 寻找期望字符串和实际字符串的相同后缀。
+		 */
+		private void findCommonSuffix() {
+
+			int expectedSuffix = fExpected.length() - 1;
+			int actualSuffix = fActual.length() - 1;
+			for (; actualSuffix >= fPrefix && expectedSuffix >= fPrefix; actualSuffix--, expectedSuffix--) {
+				if (fExpected.charAt(expectedSuffix) != fActual.charAt(actualSuffix)) {
+					break;
+				}
+			}
+			fSuffix = fExpected.length() - expectedSuffix;
+		}
+
+		/**
+		 * 获取期望字符串和实际字符串的相同前缀并返回。
+		 * 
+		 * @return 期望字符串和实际字符串的相同前缀。
+		 */
+		private String computeCommonPrefix() {
+
+			return (fPrefix > fContextLength ? ELLIPSIS : "") + fExpected.substring(Math.max(0, fPrefix - fContextLength), fPrefix);
+		}
+
+		/**
+		 * 获取期望字符串和实际字符串的相同后缀并返回。
+		 * 
+		 * @return 期望字符串和实际字符串的相同后缀。
+		 */
+		private String computeCommonSuffix() {
+
+			int end = Math.min(fExpected.length() - fSuffix + 1 + fContextLength, fExpected.length());
+			return fExpected.substring(fExpected.length() - fSuffix + 1, end) + (fExpected.length() - fSuffix + 1 < fExpected.length() - fContextLength ? ELLIPSIS : "");
+		}
+
+		/**
+		 * 判断期望字符串和实际字符串字符序列是否相同。
+		 * 
+		 * @return 如果期望字符串和实际字符串字符序列相同则返回true，否则返回false。
+		 */
+		private boolean areStringsEqual() {
+
+			return fExpected.equals(fActual);
+		}
+	}
 }

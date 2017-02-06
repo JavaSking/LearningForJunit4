@@ -19,7 +19,8 @@ import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 
 /**
- * 向后兼容JUnit3而定义的运行器。
+ * 向后兼容JUnit3而定义的运行器。<br>
+ * 该运行器负责运行旧风格的测试类（继承自TestCase）。
  * 
  * @author 注释By JavaSking 2017年2月5日
  */

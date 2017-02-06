@@ -68,8 +68,8 @@ import java.lang.annotation.Target;
 /**
  * Rule注解，标志于域或方法。<br>
  * <ul>
- * <li>域，必须为public，非静态的{@link org.junit.rules.TestRule}或{@link org.junit.rules.MethodRule}的子类型。
- * <li>方法，必须为public，非静态的，返回值必须为{@link org.junit.rules.TestRule}或{@link org.junit.rules.MethodRule}的子类型。
+ * <li>域：public，非静态的{@code TestRule}或{@code MethodRule}子类型。
+ * <li>方法：public，非静态的，返回值为{@code TestRule}或{@code MethodRule}子类型。
  * <ul>
  * 
  * 例子：
@@ -85,13 +85,13 @@ import java.lang.annotation.Target;
  *         File createdFolder= folder.newFolder(&quot;subfolder&quot;);
  *         // ...
  *     }
+ *     
  * }
  * </pre>
  *
- * And the same using a method.
- *
  * <pre>
  * public static class HasTempFolder {
+ * 
  *     private TemporaryFolder folder= new TemporaryFolder();
  *
  *     &#064;Rule

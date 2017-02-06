@@ -5,7 +5,7 @@ import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.RunnerBuilder;
 
 /**
- * 计算机，代表测试运行策略的抽象。
+ * 测试运行使用的计算机系统，代表测试运行策略的抽象。
  * 
  * @since 4.6
  * @author 注释By JavaSking 2017年2月5日
@@ -13,9 +13,9 @@ import org.junit.runners.model.RunnerBuilder;
 public class Computer {
 
 	/**
-	 * 获取序列化运行测试的计算机。
+	 * 获取序列化运行测试的计算机系统。
 	 * 
-	 * @return 序列化运行测试的计算机。
+	 * @return 序列化运行测试的计算机系统。
 	 */
 	public static Computer serial() {
 

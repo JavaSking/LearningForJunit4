@@ -9,100 +9,106 @@ import org.junit.internal.runners.ErrorReportingRunner;
 import org.junit.runner.Runner;
 
 /**
- * A RunnerBuilder is a strategy for constructing runners for classes.
- *
- * Only writers of custom runners should use <code>RunnerBuilder</code>s.  A custom runner class with a constructor taking
- * a <code>RunnerBuilder</code> parameter will be passed the instance of <code>RunnerBuilder</code> used to build that runner itself.
- * For example,
- * imagine a custom runner that builds suites based on a list of classes in a text file:
- *
- * <pre>
- * \@RunWith(TextFileSuite.class)
- * \@SuiteSpecFile("mysuite.txt")
- * class MySuite {}
- * </pre>
- *
- * The implementation of TextFileSuite might include:
- *
- * <pre>
- * public TextFileSuite(Class testClass, RunnerBuilder builder) {
- *   // ...
- *   for (String className : readClassNames())
- *     addRunner(builder.runnerForClass(Class.forName(className)));
- *   // ...
- * }
- * </pre>
- *
+ * 运行器创建工厂。<br>
+ * 设计模式：职责链模式。
+ * 
  * @see org.junit.runners.Suite
  * @since 4.5
+ * @author 注释By JavaSking 2017年2月6日
  */
 public abstract class RunnerBuilder {
-    private final Set<Class<?>> parents = new HashSet<Class<?>>();
 
-    /**
-     * Override to calculate the correct runner for a test class at runtime.
-     *
-     * @param testClass class to be run
-     * @return a Runner
-     * @throws Throwable if a runner cannot be constructed
-     */
-    public abstract Runner runnerForClass(Class<?> testClass) throws Throwable;
+	/**
+	 * 测试类集合。
+	 */
+	private final Set<Class<?>> parents = new HashSet<Class<?>>();
 
-    /**
-     * Always returns a runner, even if it is just one that prints an error instead of running tests.
-     *
-     * @param testClass class to be run
-     * @return a Runner
-     */
-    public Runner safeRunnerForClass(Class<?> testClass) {
-        try {
-            return runnerForClass(testClass);
-        } catch (Throwable e) {
-            return new ErrorReportingRunner(testClass, e);
-        }
-    }
+	/**
+	 * 获取目标测试类的运行器，若运行器创建失败则抛出异常。
+	 * 
+	 * @param testClass
+	 *          待测试类。
+	 * @return 目标测试类的运行器，可能为null。
+	 * @throws Throwable
+	 *           运行器创建异常。
+	 */
+	public abstract Runner runnerForClass(Class<?> testClass) throws Throwable;
 
-    Class<?> addParent(Class<?> parent) throws InitializationError {
-        if (!parents.add(parent)) {
-            throw new InitializationError(String.format("class '%s' (possibly indirectly) contains itself as a SuiteClass", parent.getName()));
-        }
-        return parent;
-    }
+	/**
+	 * 获取目标测试类的运行器，若运行器创建失败则创建一个错误报告运行器，返回运行器。
+	 * 
+	 * @param testClass
+	 *          待测试类。
+	 * @return 运行器。
+	 */
+	public Runner safeRunnerForClass(Class<?> testClass) {
 
-    void removeParent(Class<?> klass) {
-        parents.remove(klass);
-    }
+		try {
+			return runnerForClass(testClass);
+		} catch (Throwable e) {
+			return new ErrorReportingRunner(testClass, e);
+		}
+	}
 
-    /**
-     * Constructs and returns a list of Runners, one for each child class in
-     * {@code children}.  Care is taken to avoid infinite recursion:
-     * this builder will throw an exception if it is requested for another
-     * runner for {@code parent} before this call completes.
-     */
-    public List<Runner> runners(Class<?> parent, Class<?>[] children)
-            throws InitializationError {
-        addParent(parent);
+	/**
+	 * 添加待测试类并返回。
+	 * 
+	 * @param parent
+	 *          待测试类。
+	 * @return 待测试类。
+	 * @throws InitializationError
+	 *           运行器初始化异常。
+	 */
+	Class<?> addParent(Class<?> parent) throws InitializationError {
 
-        try {
-            return runners(children);
-        } finally {
-            removeParent(parent);
-        }
-    }
+		if (!parents.add(parent)) {
+			throw new InitializationError(String.format("class '%s' (possibly indirectly) contains itself as a SuiteClass", parent.getName()));
+		}
+		return parent;
+	}
 
-    public List<Runner> runners(Class<?> parent, List<Class<?>> children)
-            throws InitializationError {
-        return runners(parent, children.toArray(new Class<?>[0]));
-    }
+	/**
+	 * 移除目标待测试类。
+	 * 
+	 * @param klass
+	 *          待移除的测试类。
+	 */
+	void removeParent(Class<?> klass) {
 
-    private List<Runner> runners(Class<?>[] children) {
-        ArrayList<Runner> runners = new ArrayList<Runner>();
-        for (Class<?> each : children) {
-            Runner childRunner = safeRunnerForClass(each);
-            if (childRunner != null) {
-                runners.add(childRunner);
-            }
-        }
-        return runners;
-    }
+		parents.remove(klass);
+	}
+
+	public List<Runner> runners(Class<?> parent, Class<?>[] children) throws InitializationError {
+
+		addParent(parent);
+		try {
+			return runners(children);
+		} finally {
+			removeParent(parent);
+		}
+	}
+
+	public List<Runner> runners(Class<?> parent, List<Class<?>> children) throws InitializationError {
+
+		return runners(parent, children.toArray(new Class<?>[0]));
+	}
+
+	/**
+	 * 获取测试类的运行器。
+	 * 
+	 * @param children
+	 *          测试类数组。
+	 * @return 运行器数组。
+	 */
+	private List<Runner> runners(Class<?>[] children) {
+
+		ArrayList<Runner> runners = new ArrayList<Runner>();
+		for (Class<?> each : children) {
+			Runner childRunner = safeRunnerForClass(each);
+			if (childRunner != null) {
+				runners.add(childRunner);
+			}
+		}
+		return runners;
+	}
 }
